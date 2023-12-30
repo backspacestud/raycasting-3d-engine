@@ -7,27 +7,53 @@
 // for using SDL_Delay() functions
 #include <SDL2/SDL_timer.h>
 
+#include <vector>
+
+SDL_Event e;
+SDL_Window* window;
+SDL_Renderer* renderer;
+std::vector<SDL_FPoint> points;
+
+
 int main()
 {
-    SDL_Window* window = nullptr;
-    SDL_Renderer* renderer = nullptr;
+    // Initilization
+    bool running = true;
+    SDL_Event event;
 
-    //Initilize
-    SDL_Init(SDL_INIT_VIDEO);
-    SDL_CreateWindowAndRenderer(640*2,480*2, 0, &window, &renderer);
-    SDL_RenderSetScale(renderer,2, 2);
+    //Resolution
+    int resolutionW = 640;
+    int resolutionH = 480;
 
-    //Clear renderer
-    SDL_SetRenderDrawColor(renderer,0,0,0,255);
-    SDL_RenderClear(renderer);
+    //Window Init
+    SDL_Init(SDL_INIT_EVERYTHING); // SDL INIT
+    window = SDL_CreateWindow(  "coom", 
+                                 SDL_WINDOWPOS_UNDEFINED, 
+                                 SDL_WINDOWPOS_UNDEFINED,
+                                 resolutionW,
+                                 resolutionH,
+                                 0); //I dont know if I like this formatting. Saw it in a tutorial.
 
-    
-    SDL_SetRenderDrawColor(renderer,0,102,0,255); //set draw color to green
-    SDL_RenderDrawPoint(renderer,640/2,480/2); //draw point at the middle of the screen (it will be green becase the render draw color was set to green)
+    //Render Init
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
 
+    while(running)
+    {
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_QUIT) 
+            {
+                running = false;
+                break;
+            }
+        }
+    }
 
-    SDL_RenderPresent(renderer);
-    SDL_Delay(1000);
-
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
+
 }
+
+
