@@ -14,62 +14,13 @@
 #define windowHeight 480
 #define PI 3.1415926535
 
-float px, py, pdx = 5, pdy = 0, pa = 0; //player position   pa = angle   dx/dy = delta
+float playerX, playerY, pdx = 5, pdy = 0, playerAngle = 0; //player position   playerAngle = angle   dx/dy = delta
 
 
 SDL_Event e;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 std::vector<SDL_FPoint> points;
-
-
-void renderPlayer(SDL_Renderer* renderer, float px, float py)
-{
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    SDL_RenderDrawPointF(renderer, px, py);
-
-    SDL_RenderDrawLineF(renderer, px, py, (px + pdx) , (py + pdy) );
-}
-void playerControls(SDL_Event& event , float& px, float& py) //Basic controlls down, Fix later (there is a delay also its just an if else stement lol)
-{
-    if (event.type == SDL_KEYDOWN) 
-    {
-        const Uint8* keys = SDL_GetKeyboardState(NULL);
-        if (keys[SDL_SCANCODE_LEFT]) { // ROTATION
-            pa -= 0.1; // Rotate Left
-            if (pa < 0) {
-                pa = 2 * PI;
-            }
-            pdx = cos(pa) * 5;
-            pdy = sin(pa) * 5;
-            std::cout << "pdx = " << pdx << " and pdy = " << pdy << "and pa = " << pa << std::endl; 
-        } else if (keys[SDL_SCANCODE_RIGHT]) {
-            pa += 0.1; // Rotate Right
-            if ( pa > (2 * PI) ) {
-                pa = 0;
-            }
-            pdx = cos(pa) * 5;
-            pdy = sin(pa) * 5;
-            std::cout << "pdx = " << pdx << " and pdy = " << pdy << "and pa = " << pa << std::endl; 
-        } else if (keys[SDL_SCANCODE_W]) { //DIRECTION
-            py += pdy /2;
-            px += pdx /2;
-        } else if (keys[SDL_SCANCODE_S]) {
-            py -= pdy /2;
-            px -= pdx /2; 
-        }
-
-    }
-}
-
-
-void renderBackground(SDL_Renderer* renderer)
-{
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
-
-}
-
 //temp map
 int mapX= 8;
 int mapY = 8;
@@ -86,6 +37,59 @@ int map[] =
     1,1,1,1,1,1,1,1,
 };
 SDL_Rect mapWallRect;
+
+
+
+void renderPlayer(SDL_Renderer* renderer, float playerX, float playerY)
+{   
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_RenderDrawLineF(renderer, playerX, playerY, (playerX + pdx) , (playerY + pdy) );
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderDrawPointF(renderer, playerY, playerY);
+
+    
+}
+void playerControls(SDL_Event& event , float& playerX, float& playerY) //Basic controlls down, Fix later (there is a delay also its just an if else stement lol)
+{
+    if (event.type == SDL_KEYDOWN) 
+    {
+        const Uint8* keys = SDL_GetKeyboardState(NULL);
+        if (keys[SDL_SCANCODE_LEFT]) { // ROTATION
+            playerAngle -= 0.1; // Rotate Left
+            if (playerAngle < 0) {
+                playerAngle = 2 * PI;
+            }
+            pdx = cos(playerAngle) * 5;
+            pdy = sin(playerAngle) * 5;
+            //std::cout << "pdx = " << pdx << " and pdy = " << pdy << "and playerAngle = " << playerAngle << std::endl; 
+        } else if (keys[SDL_SCANCODE_RIGHT]) {
+            playerAngle += 0.1; // Rotate Right
+            if ( playerAngle > (2 * PI) ) {
+                playerAngle = 0;
+            }
+            pdx = cos(playerAngle) * 5;
+            pdy = sin(playerAngle) * 5;
+            //std::cout << "pdx = " << pdx << " and pdy = " << pdy << "and playerAngle = " << playerAngle << std::endl; 
+        } else if (keys[SDL_SCANCODE_W]) { //DIRECTION
+            playerY += pdy /2;
+            playerX += pdx /2;
+        } else if (keys[SDL_SCANCODE_S]) {
+            playerY -= pdy /2;
+            playerX -= pdx /2; 
+        }
+
+    }
+}
+
+
+void renderBackground(SDL_Renderer* renderer)
+{
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+
+}
+
+
 
 
 void renderMap2D(SDL_Renderer* renderer)
@@ -116,6 +120,59 @@ void renderMap2D(SDL_Renderer* renderer)
         }
     }
 }
+
+// void renderRays3D(SDL_Renderer* renderer)
+// {
+//     float rayAngle, rayY, rayX, rayYOffset, rayXOffset;
+//     int deapthOfField, mapRayX, mapRayY, mapRayP, r;
+//     rayAngle = playerAngle;
+//     for (r = 0; r < 1; r++)  // Changed loop condition to allow multiple iterations
+//     {
+//         // Check for Horizontal Lines
+//         deapthOfField = 0;
+//         float aTan = -1 / tan(rayAngle);
+//         if (rayAngle > PI) // Ray is facing down
+//         {
+//             rayY = (((int)playerY >> 6) << 6) - 0.0001;
+//             rayX = (playerY - rayY) * aTan + playerX;
+//             rayYOffset = -mapS;
+//             rayXOffset = -rayYOffset * aTan;
+//         }
+//         if (rayAngle < PI) // Ray is facing up
+//         {
+//             rayY = (((int)playerY >> 6) << 6) + mapS;
+//             rayX = (playerY - rayY) * aTan + playerY;
+//             rayYOffset = mapS;
+//             rayXOffset = -rayYOffset * aTan;
+//         }
+//         if (rayAngle == 0 || rayAngle == PI)
+//         {
+//             rayX = playerX;
+//             rayY = playerY;
+//             deapthOfField = 8;
+//         }
+//         while (deapthOfField < 8)
+//         {
+//             mapRayX = (int)(rayX) >> 6;
+//             mapRayY = (int)(rayY) >> 6;
+//             mapRayP = mapRayY * mapS + mapRayX; // Corrected mapRayX
+//             if (mapRayP < mapX * mapY && map[mapRayP] == 1) // hit wall
+//             {
+//                 deapthOfField = 8;
+//             }
+//             else
+//             {
+//                 rayX += rayXOffset;
+//                 rayY += rayYOffset;
+//                 deapthOfField += 1;
+//             }
+//         }
+
+//         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // blue
+//         SDL_RenderDrawLineF(renderer, playerX, playerY, rayX, rayY);
+//     }
+// }
+
     
 
 
@@ -139,7 +196,7 @@ int main()
     SDL_RenderClear(renderer);
 
     //player position Init
-    px = (mapX * mapS) / 2; py = (mapY * mapS) / 2;
+    playerX = (mapX * mapS) / 2; playerY = (mapY * mapS) / 2;
 
 
 
@@ -153,11 +210,11 @@ int main()
                 running = false;
                 break;
             }
-            playerControls(event , px , py);
+            playerControls(event , playerX , playerY);
         }
         renderBackground(renderer);
         renderMap2D(renderer);
-        renderPlayer(renderer, px, py);
+        renderPlayer(renderer, playerX, playerY);
 
 
         SDL_RenderPresent(renderer);
